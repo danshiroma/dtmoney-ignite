@@ -1,12 +1,19 @@
-import { useEffect } from "react"
-import { api } from "../../services/api"
+import { useTransactions } from "../../hooks/useTransactions"
 import { Container } from "./styles"
 
-export function TransactionsTable() {
-  useEffect(() => {
-    api.get("transactions")
-  }, [])
+function getValueFormattedAsCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(value)
+}
 
+function getCreatedAtFormatted(date: string) {
+  return new Intl.DateTimeFormat("pt-BR").format(new Date(date))
+}
+
+export function TransactionsTable() {
+  const { transactions } = useTransactions()
   return (
     <Container>
       <table>
@@ -20,18 +27,16 @@ export function TransactionsTable() {
         </thead>
 
         <tbody>
-          <tr>
-            <td>Site</td>
-            <td className="deposit">R$12000,00</td>
-            <td>Freela</td>
-            <td>25/02/2022</td>
-          </tr>
-          <tr>
-            <td>Computador</td>
-            <td className="withdraw">- R$7000,00</td>
-            <td>Upgrade</td>
-            <td>25/02/2022</td>
-          </tr>
+          {transactions.map(transaction => (
+            <tr key={transaction.id}>
+              <td>{transaction.title}</td>
+              <td className={transaction.type}>
+                {getValueFormattedAsCurrency(transaction.value)}
+              </td>
+              <td>{transaction.category}</td>
+              <td>{getCreatedAtFormatted(transaction.createdAt)}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </Container>
